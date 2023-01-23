@@ -35,13 +35,19 @@ def training_probaUnet(dataloaders, epochs, device, beta, net, optimizer, modelP
 
     return train_loss, train_loss_
 
-def training_Unet(dataloaders, epochs, device, loss_fn, net, optimizer, modelPath):
+def training_Unet(dataloaders, epochs, device, loss_fn, net, optimizer, modelPath, multi = False):
     train_loss = [] 
     for epoch in range(epochs):
         for step, batch in enumerate(dataloaders): 
-            X, y = batch
-            X, y  = X.to(device), y.to(device)
-            outputs = net(X)
+            if multi:
+                X, X_af, X_be, y = batch
+                X, X_af, X_be, y = X.to(device), X_af.to(device), X_be.to(device), y.to(device)
+                outputs = net(X, X_af, X_be)
+            else:
+                X, y = batch
+                X, y  = X.to(device), y.to(device)
+                outputs = net(X)
+
             loss = loss_fn(outputs, y)
 
             if step % 30 == 0:

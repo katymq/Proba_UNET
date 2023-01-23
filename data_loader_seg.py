@@ -4,6 +4,9 @@ import torch
 import numpy as np
 
 class SegmentationDataset_DA(Dataset):
+    '''
+    Data augmentation
+    '''
     def __init__(self, imagePaths, maskPaths, image_shape, transforms = None, error = 20):
         # store the image and mask filepaths, and augmentation
         # transforms

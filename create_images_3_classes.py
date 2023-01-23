@@ -4,15 +4,16 @@ from outils_prepro import create_binary_mask, box_image_seg, read_image
 def create_box_images(image_Paths, mask_Paths, error, Area):
     image_list = []
     mask_list = []
-
+    box_list = []
     for idx in range(len(mask_Paths)):
-        mask =  create_binary_mask(mask_Paths, idx)
+        mask =  create_binary_mask(mask_Paths[idx])
         image = read_image(image_Paths[idx], False )
-        masks_imgs, imgs = box_image_seg(mask, image, error, Area)
+        masks_imgs, imgs, boxes = box_image_seg(mask, image, error, Area)
         image_list += imgs
         mask_list += masks_imgs
+        box_list += boxes
     
-    return image_list, mask_list
+    return image_list, mask_list, box_list
 
 def create_dir_paths(path, train = True):
     '''

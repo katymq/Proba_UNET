@@ -19,9 +19,34 @@ def create_mask_SR(img):
         mask_img[ image == 1 ]  = (i+1)
     return mask_img  
 
-def box_image_seg(mask, img, error = 5, Area = 50):
+# def box_image(mask, img, error = 5, Area = 50):
+#     masks_imgs = []
+#     imgs = []
+#     box_info = []
+#     label = (mask!=0)*1
+#     contours , _ = cv2.findContours(label.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#     idxs =  list(np.where(np.array([cv2.contourArea(x) for x in contours])>Area))[0]
+#     #print(idxs)
+#     #j = int(np.where([cv2.contourArea(x) for x in contours] == np.max([cv2.contourArea(x) for x in contours]))[0][0])
+#     pix  = np.sum(label)
+#     if pix > 12 and len(idxs)>0:   
+#         for idx in idxs:
+#             x,y,w,h = cv2.boundingRect(contours[int(idx)])
+#             #print(x,y,w,h)
+#             masks_imgs.append(mask[y-error:y+h+error,x-error:x+w+error])
+#             imgs.append(img[y-error:y+h+error,x-error:x+w+error])
+#             box_info.append([x,y,w,h])
+    
+#     return masks_imgs, imgs,  box_info
+def box_image_seg(mask, img, error, Area = 50):
+    '''
+    From an image we can get several images for training
+    It depends on the minimun area to create a nwe image
+    It means we have several boxes information which contain localisation information of calcifications  
+    '''
     masks_imgs = []
     imgs = []
+    box_info = []
     label = (mask!=0)*1
     contours , _ = cv2.findContours(label.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     idxs =  list(np.where(np.array([cv2.contourArea(x) for x in contours])>Area))[0]
@@ -34,8 +59,12 @@ def box_image_seg(mask, img, error = 5, Area = 50):
             #print(x,y,w,h)
             masks_imgs.append(mask[y-error:y+h+error,x-error:x+w+error])
             imgs.append(img[y-error:y+h+error,x-error:x+w+error])
+            box_info.append([x,y,w,h])
     
-    return masks_imgs, imgs
+    return masks_imgs, imgs,  box_info
+
+
+
 
 def read_image(imagePath, mask = True ):
     if mask:
@@ -50,8 +79,8 @@ def read_image(imagePath, mask = True ):
         
     return image
 
-def create_mask(mask_Path, idx):
-    mask_img_bi = create_binary_mask(mask_Path, idx)
+def create_mask(mask_Path):
+    mask_img_bi = create_binary_mask(mask_Path)
     n, m  =  mask_img_bi.shape
     mask_img = np.zeros(shape=(n, m, 3))
     for i in range(3):
@@ -61,8 +90,8 @@ def create_mask(mask_Path, idx):
         #mask_img[ image == 255 ]  = (i+1)
     return mask_img 
 
-def create_binary_mask(mask_Path, idx):
-    list_images = create_img_mask(mask_Path, idx)
+def create_binary_mask(mask_Path):
+    list_images = create_img_mask(mask_Path)
     list_images.reverse()
     
     n, m = list_images[0].shape
@@ -72,9 +101,9 @@ def create_binary_mask(mask_Path, idx):
     return mask_img    
     
 
-def create_img_mask(mask_Path, idx):
+def create_img_mask(mask_Path):
     list_images = []
-    for imagePath in mask_Path[idx]:
+    for imagePath in mask_Path:
         list_images.append(read_image(imagePath))
     return list_images
 
